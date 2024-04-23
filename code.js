@@ -79,9 +79,16 @@ deselectButton.addEventListener("click", deselect);
 newGameButton.addEventListener("click", newGame);
 //#endregion
 
+//Start a new game
 newGame();
 
 //#region Functions
+/**
+ * When a grid item is clicked, it needs to show as selected (turn black),
+ * unless there are already 4 items selected, in which case it doesn't get selected.
+ * If the item was already selected, it reverts back to the non-selected color.
+ * @param {event} e the specific button clicked
+ */
 function touchItem(e)
 {
     if(e.target.classList.contains("selected"))
@@ -99,6 +106,11 @@ function touchItem(e)
     
     // console.log(selectedList)
 }
+/**
+ * Removes the "selected" class from all grid items.
+ * @param {event} e the specific button clicked (in this case, it's always the
+ *                  deselect button)
+ */
 function deselect(e)
 {
     for (let index = 0; index < itemList.length; index++) {
@@ -140,33 +152,27 @@ function isValidSet()
                     item.style.display = "none";
                 }
             }
-            //Remove selected items from grid
-            //trigger deselect
-            deselectButton.click();
-            return true;
-        }
-    }
-    return false;
+    return -1;
     
+}
+    }
+    text += "</p>"
+    gameSetItems[indexOfValidSet].innerHTML = text;
 }
 function submit(e)
 {
     if(selectedList.length == 4)
     {
-        if (isValidSet())
+        indexOfValidSet = getValidIndex()
+        if (indexOfValidSet != -1)
         {
-            //do something
-            let allFound = true;
-            for(index = 0; index < gameSetItems.length; index++)
-            {
-                if(gameSetItems[index].style.display == "none")
-                {
-                    console.log("Nope")
-                    allFound = false;
-                    break;
-                }
-            }
-            if(allFound)
+            setCategoryText(indexOfValidSet);
+            //show category
+            gameSetItems[indexOfValidSet].style.display="block";
+            //hide all selected items (because they were found)
+            hideSelected()
+            deselectButton.click();
+            if(allFound())
             {
                 clearInterval(timer);
                 timer=null;
@@ -179,6 +185,28 @@ function submit(e)
             setTimeout(waitToFade, 2000);
         }
     }
+}
+function hideSelected()
+{
+    for(i = 0; i < itemList.length; i++)
+    {
+        let item = itemList[i];
+        if(item.classList.contains("selected"))
+        {
+            item.style.display = "none";
+        }
+    }
+}
+function allFound()
+{
+    for(index = 0; index < gameSetItems.length; index++)
+    {
+        if(gameSetItems[index].style.display == "none")
+        {
+            return false;
+        }
+    }
+    return true;
 }
 function waitToFade()
 {
@@ -206,23 +234,20 @@ function newGame(e)
         random_val(blue),
         random_val(purple)
     ];
-    //Update text for when correct categories are discovered
-    for(i = 0; i < gameSet.length; i++)
-    {
+}
+function hideCategories()
+{
         let text = "<h2>"+gameSet[i][0]+"</h2><p>"
         for(j = 1; j < gameSet[i].length; j++)
         {
-            text += gameSet[i][j];
-            if(i < gameSet[i].length-1)
-                text += ", ";
-        }
+        gameSetItems[i].style.display = "none";
+        gameSetItems[i].innerHTML = "";
+    }
         text += "</p>"
         gameSetItems[i].innerHTML = text;
     }
-    //Randomize the set
-    let randomSet = [];
-    for(i = 0; i < gameSet.length; i++)
-    {
+function twoDListToOneDList(list)
+{
         for(j = 1; j < gameSet[i].length; j++)
         {
             randomSet.push(gameSet[i][j]);
