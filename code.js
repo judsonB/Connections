@@ -58,10 +58,14 @@ const deselectButton = document.getElementById("deselect");
 const newGameButton = document.getElementById("newGame");
 const itemList = document.getElementsByClassName("item");
 const invalidBox = document.getElementById("invalidContainer");
+const gameSetItems = document.getElementsByClassName("cat");
 //#endregion
 
 //#region Additional Variables
+let gameSet = [];
 let selectedList = [];
+let time = 0;
+let timer = null;
 fadeOut = null;
 //#endregion
 
@@ -108,21 +112,73 @@ function deselect(e)
         }
     }
 }
+function isValidSet()
+{
+    for(index = 0; index < gameSet.length; index++)
+    {
+        let currentSet = gameSet[index];
+        let inList = true;
+        console.log(currentSet)
+        console.log("~"+selectedList)
+        //Starting @ 1 because 0 = category
+        for(thisItem = 1; thisItem < currentSet.length && inList; thisItem++)
+        {
+            console.log("Looking For "+currentSet[thisItem])
+            if(!selectedList.includes(currentSet[thisItem]))
+            {
+                inList = false;
+            }
+        }
+        if (inList)
+        {
+            gameSetItems[index].style.display="block";
+            for(i = 0; i < itemList.length; i++)
+            {
+                let item = itemList[i];
+                if(item.classList.contains("selected"))
+                {
+                    item.style.display = "none";
+                }
+            }
+            //Remove selected items from grid
+            //trigger deselect
+            deselectButton.click();
+            return true;
+        }
+    }
+    return false;
+    
+}
 function submit(e)
 {
-    console.log("...")
-    invalidBox.style.opacity = 1;
-    setTimeout(waitToFade, 2000);
-    // for (let index = 0; index < itemList.length; index++) {
-    //     const element = itemList[index];
-    //     if(element.classList.contains("selected"))
-    //     {
-    //         const index = selectedList.indexOf(element.innerText);
-    //         const x = selectedList.splice(index, 1);
-    //         console.log(`Removing: ${x}`);
-    //         element.classList.toggle("selected");
-    //     }
-    // }
+    if(selectedList.length == 4)
+    {
+        if (isValidSet())
+        {
+            //do something
+            let allFound = true;
+            for(index = 0; index < gameSetItems.length; index++)
+            {
+                if(gameSetItems[index].style.display == "none")
+                {
+                    console.log("Nope")
+                    allFound = false;
+                    break;
+                }
+            }
+            if(allFound)
+            {
+                clearInterval(timer);
+                timer=null;
+            }
+        }
+        else
+        {
+            invalidBox.style.opacity = 1;
+            invalidBox.style.display = "block";
+            setTimeout(waitToFade, 2000);
+        }
+    }
 }
 function waitToFade()
 {
@@ -135,28 +191,43 @@ function fade()
     if(invalidBox.style.opacity <= 0)
     {
         opacity = 0;
+        invalidBox.style.display = "none";
         clearInterval(fadeOut);
         fadeout = null;
     }
 }
 function newGame(e)
 {
-    let gameSet = [
+    deselectButton.click();
+    //Grab a set
+    gameSet = [
         random_val(yellow),
         random_val(green),
         random_val(blue),
         random_val(purple)
     ];
+    //Update text for when correct categories are discovered
+    for(i = 0; i < gameSet.length; i++)
+    {
+        let text = "<h2>"+gameSet[i][0]+"</h2><p>"
+        for(j = 1; j < gameSet[i].length; j++)
+        {
+            text += gameSet[i][j];
+            if(i < gameSet[i].length-1)
+                text += ", ";
+        }
+        text += "</p>"
+        gameSetItems[i].innerHTML = text;
+    }
+    //Randomize the set
     let randomSet = [];
     for(i = 0; i < gameSet.length; i++)
     {
         for(j = 1; j < gameSet[i].length; j++)
         {
-            // console.log(gameSet[i][j])
             randomSet.push(gameSet[i][j]);
         }
     }
-    // console.log(randomSet);
     for(i = 0; i < randomSet.length; i++)//Shuffle
     {
         for(j = 0; j < 5; j++)//Ensure more randomized...
@@ -168,16 +239,28 @@ function newGame(e)
             randomSet[swapSpot] = temp;
         }
     }
-    // console.log(randomSet);
+    for (let i = 0; i < gameSetItems.length; i++) 
+    {
+        gameSetItems[i].style.display = "none";
+    }
     for (let i = 0; i < itemList.length; i++) 
     {
         const element = itemList[i];
-        element.innerText = randomSet[i];
+        element.innerHTML = randomSet[i];
+        element.style.display = "block";
         element.style.fontSize = 30 + 'px';
         // console.log(randomSet[i])
         //Ensure the font is small enough for the container
         resize_to_fit(element);
     }
+    clearInterval(timer);
+    time = 0;
+    timer = setInterval(updateTime, 100);
+}
+function updateTime()
+{
+    time += .1;
+    timeLeftBox.innerHTML = time.toFixed(1);
 }
 function random_range(low, high)
 {
