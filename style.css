@@ -51,8 +51,8 @@ body
     height: 70px;
     text-align: center;
     overflow: hidden;
-    /*word-break: break-all;*/
-    word-wrap: break-word;
+    /*word-break: break-all;
+    word-wrap: break-word;*/
     font-size: 30px;
     padding: 10px;
 }

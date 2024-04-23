@@ -95,7 +95,6 @@ function touchItem(e)
     {
         const index = selectedList.indexOf(e.target.innerText);
         const x = selectedList.splice(index, 1);
-        // console.log(`Removing: ${x}`);
         e.target.classList.toggle("selected");
     }
     else if(selectedList.length < 4)
@@ -103,8 +102,6 @@ function touchItem(e)
         selectedList.push(e.target.innerText);
         e.target.classList.toggle("selected");
     }
-    
-    // console.log(selectedList)
 }
 /**
  * Removes the "selected" class from all grid items.
@@ -119,23 +116,20 @@ function deselect(e)
         {
             const index = selectedList.indexOf(element.innerText);
             const x = selectedList.splice(index, 1);
-            // console.log(`Removing: ${x}`);
             element.classList.toggle("selected");
         }
     }
 }
-function isValidSet()
+
+function getValidIndex()
 {
     for(index = 0; index < gameSet.length; index++)
     {
         let currentSet = gameSet[index];
         let inList = true;
-        console.log(currentSet)
-        console.log("~"+selectedList)
         //Starting @ 1 because 0 = category
         for(thisItem = 1; thisItem < currentSet.length && inList; thisItem++)
         {
-            console.log("Looking For "+currentSet[thisItem])
             if(!selectedList.includes(currentSet[thisItem]))
             {
                 inList = false;
@@ -143,18 +137,20 @@ function isValidSet()
         }
         if (inList)
         {
-            gameSetItems[index].style.display="block";
-            for(i = 0; i < itemList.length; i++)
-            {
-                let item = itemList[i];
-                if(item.classList.contains("selected"))
-                {
-                    item.style.display = "none";
-                }
-            }
+            return index;
+        }
+    }
     return -1;
     
 }
+function setCategoryText(indexOfValidSet)
+{
+    let text = "<h2>"+gameSet[indexOfValidSet][0]+"</h2><p>"
+    for(j = 1; j < gameSet[indexOfValidSet].length; j++)
+    {
+        text += gameSet[indexOfValidSet][j];
+        if(j < gameSet[indexOfValidSet].length-1)
+            text += ", ";
     }
     text += "</p>"
     gameSetItems[indexOfValidSet].innerHTML = text;
@@ -215,7 +211,6 @@ function waitToFade()
 function fade()
 {
     invalidBox.style.opacity = invalidBox.style.opacity - .05;
-    console.log("fading...")
     if(invalidBox.style.opacity <= 0)
     {
         opacity = 0;
@@ -224,10 +219,8 @@ function fade()
         fadeout = null;
     }
 }
-function newGame(e)
+function buildGameSet()
 {
-    deselectButton.click();
-    //Grab a set
     gameSet = [
         random_val(yellow),
         random_val(green),
@@ -237,44 +230,56 @@ function newGame(e)
 }
 function hideCategories()
 {
-        let text = "<h2>"+gameSet[i][0]+"</h2><p>"
-        for(j = 1; j < gameSet[i].length; j++)
-        {
+    for (let i = 0; i < gameSetItems.length; i++) 
+    {
         gameSetItems[i].style.display = "none";
         gameSetItems[i].innerHTML = "";
     }
-        text += "</p>"
-        gameSetItems[i].innerHTML = text;
-    }
+}
 function twoDListToOneDList(list)
 {
-        for(j = 1; j < gameSet[i].length; j++)
+    let newList = [];
+    for(i = 0; i < list.length; i++)
+    {
+        for(j = 1; j < list[i].length; j++)
         {
-            randomSet.push(gameSet[i][j]);
+            newList.push(list[i][j]);
         }
     }
-    for(i = 0; i < randomSet.length; i++)//Shuffle
+    return newList;
+}
+function shuffle(list)
+{
+    for(i = 0; i < list.length; i++)//Shuffle
     {
         for(j = 0; j < 5; j++)//Ensure more randomized...
         {
             //Swap 2 locations in the list
-            let swapSpot = random_range(0, randomSet.length -1);
-            let temp = randomSet[i];
-            randomSet[i] = randomSet[swapSpot];
-            randomSet[swapSpot] = temp;
+            let swapSpot = random_range(0, list.length -1);
+            let temp = list[i];
+            list[i] = list[swapSpot];
+            list[swapSpot] = temp;
         }
     }
-    for (let i = 0; i < gameSetItems.length; i++) 
-    {
-        gameSetItems[i].style.display = "none";
-    }
+}
+function newGame(e)
+{
+    //Hide Categories & set innerHTML to "";
+    hideCategories();
+    deselectButton.click();
+    buildGameSet();
+    //Add game sets to a single list (instead of a 2D list)
+    let randomSet = twoDListToOneDList(gameSet);
+    
+    //Randomize/shuffle the set
+    shuffle(randomSet);
+    //Add random items to grid
     for (let i = 0; i < itemList.length; i++) 
     {
         const element = itemList[i];
         element.innerHTML = randomSet[i];
         element.style.display = "block";
         element.style.fontSize = 30 + 'px';
-        // console.log(randomSet[i])
         //Ensure the font is small enough for the container
         resize_to_fit(element);
     }
@@ -302,7 +307,6 @@ function resize_to_fit(specificItem)
 {
     let fontSize = window.getComputedStyle(specificItem).fontSize;
     specificItem.style.fontSize = (parseFloat(fontSize) - 1) + 'px';
-    //console.log("("+specificItem.clientWidth+"x"+specificItem.clientHeight+") vs ("+specificItem.scrollWidth+"x"+specificItem.scrollHeight+")")
     if(specificItem.clientHeight < specificItem.scrollHeight || specificItem.clientWidth < specificItem.scrollWidth)
     {
         resize_to_fit(specificItem);
