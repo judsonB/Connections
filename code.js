@@ -27,24 +27,24 @@ const green = [
 const blue = [
     ["Fictional Characters", "Harry Potter", "Sherlock Holmes", "Romeo & Juliet", "Captain Ahab"],
     ["Mythological Creatures", "Dragon", "Unicorn", "Centaur", "Mermaid"],
-    ["Words of Foreign Origin", "Karaoke (Japanese)", "Fiesta (Spanish)", "Deja Vu (French)", "Matryoshka (Russian)"],
+    ["Words of Foreign Origin", "Karaoke", "Fiesta", "Deja Vu", "Matryoshka"],
     ["Words with Silent Letters", "Knee", "Gnome", "Castle", "Island"],
-    ["Words Derived from Other Words", "Telephone (Tele + Phone)", "Butterfly (Butter + Fly)"],
+    ["Words Derived from Other Words", "Telephone", "Butterfly", "podcast", "Ebook"],
     ["Chemical Elements", "Oxygen", "Hydrogen", "Carbon", "Nitrogen"],
     ["Famous Works of Art", "Mona Lisa", "Starry Night", "The Scream", "Guernica"],
-    ["Words with Multiple Meanings", "Fair (adjective & noun)", "Bat (noun & verb)"],
+    ["Words with Multiple Meanings", "Fair", "Bat", "Pitch", "Right"],
     ["Literary Genres", "Poetry", "Novel", "Drama", "Non-Fiction"],
     ["Historical Events", "American Revolution", "World War II", "French Revolution", "Moon Landing"]
 ];
 const purple = [
-    ["Phobias", "Arachnophobia (Spiders)", "Claustrophobia (Enclosed Spaces)", "Acrophobia (Heights)", "Agoraphobia (Open Spaces)"],
-    ["Words with Homophones", "There (They're)", "To (Too", "Two)", "Pear (Pair)", "Write (Right)"],
+    ["____phobias", "Arachno", "Aiboh", "Acro", "Agora"],
+    ["Words with Homophones", "There", "To", "Pear", "Write"],
     ["Famous Inventors", "Leonardo da Vinci", "Thomas Edison", "Marie Curie", "Alexander Graham Bell"],
-    ["Words from Mythology", "Styx (River in the Underworld)", "Elysium (Greek Paradise)", "Valhalla (Norse Paradise)", "Olympus (Greek Home of Gods)"],
-    ["Words with Prefixes", "Anti- (Opposite)", "De- (Remove)", "Re- (Do Again)", "Pre- (Before)"],
-    ["Words with Suffixes", "-ment (Act of)", "-ion (State of Being)", "-able (Can Be)", "-ful (Full Of)"],
+    ["Words from Mythology", "Styx", "Elysium", "Valhalla", "Olympus"],
+    ["Words with Prefixes", "Anti", "De", "Re", "Pre"],
+    ["Words with Suffixes", "ment", "ion", "able", "ful"],
     ["Famous Playwrights", "William Shakespeare", "Arthur Miller", "Tennessee Williams", "August Wilson"],
-    ["Literary Devices", "Simile (Comparison using like/as)", "Metaphor (Direct Comparison)", "Symbolism (Represents Something Else)", "Foreshadowing (Hint of Future Events)"],
+    ["Literary Devices", "Simile", "Metaphor", "Symbolism", "Foreshadowing"],
     ["Philosophical Concepts", "Existentialism", "Stoicism", "Utilitarianism", "Nihilism"],
     ["Astronomical Objects", "Galaxy", "Nebula", "Black Hole", "Comet"],
 ];
@@ -57,10 +57,12 @@ const submitButton = document.getElementById("submit");
 const deselectButton = document.getElementById("deselect");
 const newGameButton = document.getElementById("newGame");
 const itemList = document.getElementsByClassName("item");
+const invalidBox = document.getElementById("invalidContainer");
 //#endregion
 
 //#region Additional Variables
 let selectedList = [];
+fadeOut = null;
 //#endregion
 
 //#region AddEventListeners
@@ -68,7 +70,12 @@ for (let index = 0; index < itemList.length; index++) {
     const element = itemList[index];
     element.addEventListener("click", touchItem);
 }
+submitButton.addEventListener("click", submit);
+deselectButton.addEventListener("click", deselect);
+newGameButton.addEventListener("click", newGame);
 //#endregion
+
+newGame();
 
 //#region Functions
 function touchItem(e)
@@ -77,7 +84,7 @@ function touchItem(e)
     {
         const index = selectedList.indexOf(e.target.innerText);
         const x = selectedList.splice(index, 1);
-        console.log(`Removing: ${x}`);
+        // console.log(`Removing: ${x}`);
         e.target.classList.toggle("selected");
     }
     else if(selectedList.length < 4)
@@ -86,6 +93,111 @@ function touchItem(e)
         e.target.classList.toggle("selected");
     }
     
-    console.log(selectedList)
+    // console.log(selectedList)
+}
+function deselect(e)
+{
+    for (let index = 0; index < itemList.length; index++) {
+        const element = itemList[index];
+        if(element.classList.contains("selected"))
+        {
+            const index = selectedList.indexOf(element.innerText);
+            const x = selectedList.splice(index, 1);
+            // console.log(`Removing: ${x}`);
+            element.classList.toggle("selected");
+        }
+    }
+}
+function submit(e)
+{
+    console.log("...")
+    invalidBox.style.opacity = 1;
+    setTimeout(waitToFade, 2000);
+    // for (let index = 0; index < itemList.length; index++) {
+    //     const element = itemList[index];
+    //     if(element.classList.contains("selected"))
+    //     {
+    //         const index = selectedList.indexOf(element.innerText);
+    //         const x = selectedList.splice(index, 1);
+    //         console.log(`Removing: ${x}`);
+    //         element.classList.toggle("selected");
+    //     }
+    // }
+}
+function waitToFade()
+{
+    fadeOut = setInterval(fade, 50);
+}
+function fade()
+{
+    invalidBox.style.opacity = invalidBox.style.opacity - .05;
+    console.log("fading...")
+    if(invalidBox.style.opacity <= 0)
+    {
+        opacity = 0;
+        clearInterval(fadeOut);
+        fadeout = null;
+    }
+}
+function newGame(e)
+{
+    let gameSet = [
+        random_val(yellow),
+        random_val(green),
+        random_val(blue),
+        random_val(purple)
+    ];
+    let randomSet = [];
+    for(i = 0; i < gameSet.length; i++)
+    {
+        for(j = 1; j < gameSet[i].length; j++)
+        {
+            // console.log(gameSet[i][j])
+            randomSet.push(gameSet[i][j]);
+        }
+    }
+    // console.log(randomSet);
+    for(i = 0; i < randomSet.length; i++)//Shuffle
+    {
+        for(j = 0; j < 5; j++)//Ensure more randomized...
+        {
+            //Swap 2 locations in the list
+            let swapSpot = random_range(0, randomSet.length -1);
+            let temp = randomSet[i];
+            randomSet[i] = randomSet[swapSpot];
+            randomSet[swapSpot] = temp;
+        }
+    }
+    // console.log(randomSet);
+    for (let i = 0; i < itemList.length; i++) 
+    {
+        const element = itemList[i];
+        element.innerText = randomSet[i];
+        element.style.fontSize = 30 + 'px';
+        // console.log(randomSet[i])
+        //Ensure the font is small enough for the container
+        resize_to_fit(element);
+    }
+}
+function random_range(low, high)
+{
+    let size = high - low + 1;
+    return Math.floor(Math.random() * size) + low;
+}
+function random_val(list)
+{
+    let rand = random_range(0, list.length-1);
+    return list[rand];
+}
+//Ensure the font is small enough for the container
+function resize_to_fit(specificItem) 
+{
+    let fontSize = window.getComputedStyle(specificItem).fontSize;
+    specificItem.style.fontSize = (parseFloat(fontSize) - 1) + 'px';
+    //console.log("("+specificItem.clientWidth+"x"+specificItem.clientHeight+") vs ("+specificItem.scrollWidth+"x"+specificItem.scrollHeight+")")
+    if(specificItem.clientHeight < specificItem.scrollHeight || specificItem.clientWidth < specificItem.scrollWidth)
+    {
+        resize_to_fit(specificItem);
+    }
 }
 //#endregion
